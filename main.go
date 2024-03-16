@@ -16,7 +16,7 @@ func onReady() {
 	item1 := systray.AddMenuItem("Item 1", "This is item 1")
 	subMenu1 := item1.AddSubMenuItem("Subitem 1.1", "This is subitem 1.1")
 	subMenu2 := item1.AddSubMenuItem("Subitem 1.2", "This is subitem 1.2")
-	subMenu1.AddSubMenuItem("Sub-subitem 1.1.1", "This is sub-subitem 1.1.1")
+	subMenu11 := subMenu1.AddSubMenuItem("Sub-subitem 1.1.1", "This is sub-subitem 1.1.1")
 	subMenu1.AddSubMenuItem("Sub-subitem 1.1.2", "This is sub-subitem 1.1.2")
 	subMenu2.AddSubMenuItem("Sub-subitem 1.2.1", "This is sub-subitem 1.2.1")
 
@@ -35,6 +35,22 @@ func onReady() {
 		<-quitMenuItem.ClickedCh
 		fmt.Print("Quit")
 		systray.Quit()
+	}()
+
+	// Add click handlers for submenu items
+	go func() {
+		for {
+			select {
+			case <-subMenu11.ClickedCh:
+				fmt.Println("Subitem 1.1 clicked")
+			case <-subMenu2.ClickedCh:
+				fmt.Println("Subitem 1.2 clicked")
+			case <-subMenu3.ClickedCh:
+				fmt.Println("Subitem 2.1 clicked")
+			case <-subMenu4.ClickedCh:
+				fmt.Println("Subitem 2.2 clicked")
+			}
+		}
 	}()
 }
 
