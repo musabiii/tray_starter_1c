@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 
 	"os/exec" // for current user
@@ -21,7 +20,6 @@ func onReady() {
 	// systray.SetIcon(icon.Data)	// Load your custom icon
 	iconBytes, err := ioutil.ReadFile("./icons/1c.ico")
 	if err != nil {
-		fmt.Println("Failed to load icon:", err)
 		return
 	}
 
@@ -42,11 +40,10 @@ func onReady() {
 	quitMenuItem := systray.AddMenuItem("Quit", "Quit the whole app")
 	go func() {
 		<-quitMenuItem.ClickedCh
-		fmt.Print("Quit")
 		systray.Quit()
 	}()
 
-	handleSubMenuClicks2(itemsMap, connections)
+	handleSubMenuClicks(itemsMap, connections)
 
 }
 
@@ -57,11 +54,8 @@ func onExit() {
 func fillItemsMap(itemsMap map[string]*systray.MenuItem, foldersMap map[string][]parse_1c_v8.Connection) {
 
 	for k, v := range foldersMap {
-		fmt.Println(k)
 		item1 := systray.AddMenuItem(k, "This is item 1")
 		for _, vv := range v {
-			// fmt.Println(vv.Connect)
-			fmt.Printf("vv: %v\n", vv.Name)
 			item11 := item1.AddSubMenuItem(vv.Name, vv.Connect)
 			itemsMap[vv.Name] = item11 // Add to ma
 
@@ -70,23 +64,17 @@ func fillItemsMap(itemsMap map[string]*systray.MenuItem, foldersMap map[string][
 	}
 }
 
-func handleSubMenuClicks2(itemsMap map[string]*systray.MenuItem, connections []parse_1c_v8.Connection) {
-
-	for k, v := range itemsMap {
-		go func(subMenu *systray.MenuItem, Title string) {
-			for {
-				select {
-				case <-subMenu.ClickedCh:
-					// find item in connections with Name = Title
-					for _, vv := range connections {
-						if vv.Name == Title {
-							runBase(vv.Connect)
-						}
+func handleSubMenuClicks(itemsMap map[string]*systray.MenuItem, connections []parse_1c_v8.Connection) {
+	for title, menuItem := range itemsMap {
+		go func(title string, menuItem *systray.MenuItem) {
+			for range menuItem.ClickedCh {
+				for _, conn := range connections {
+					if conn.Name == title {
+						runBase(conn.Connect)
 					}
 				}
 			}
-		}(v, k)
-
+		}(title, menuItem)
 	}
 }
 
